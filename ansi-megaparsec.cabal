@@ -1,0 +1,24 @@
+name:                ansi-megaparsec
+version:             0.1.0.0
+synopsis:            Parsers for ANSI escape sequences
+-- description:         
+homepage:            https://github.com/rehno-lindeque/megaparsec-ansi-code
+license:             BSD3
+license-file:        LICENSE
+author:              Rehno Lindeque
+maintainer:          rehno.lindeque+code@gmail.com
+-- copyright:           
+category:            Text
+build-type:          Simple
+extra-source-files:  ChangeLog.md, README.md
+cabal-version:       >=1.10
+
+library
+  build-depends:       base >=4.10 && <4.11
+                     , megaparsec
+                     , text
+  hs-source-dirs:      src
+  exposed-modules:    Text.Megaparsec.ANSI
+                    , Text.Megaparsec.ANSI.Lexer
+                    , Text.Megaparsec.ANSI.Internal
+  default-language:    Haskell2010
