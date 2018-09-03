@@ -15,10 +15,32 @@ cabal-version:       >=1.10
 
 library
   build-depends:       base >=4.10 && <4.11
+  --                   , ansi-terminal >=0.7.1.1
+  --                   , attoparsec
+  --                   , bytestring
+  --                   , containers
+  --                   , exceptions
+  --                   , free
+  --                   , lifted-base
                      , megaparsec >= 7.0
+  --                   , monad-control
+  --                   , posix-pty
+  --                   , process
+  --                   , stm
                      , text
+  --                   , transformers
+  --                   , unix
+  --                   , vty
   hs-source-dirs:      src
   exposed-modules:    Text.Megaparsec.ANSI
                     , Text.Megaparsec.ANSI.Lexer
                     , Text.Megaparsec.ANSI.Internal
   default-language:    Haskell2010
+
+test-suite test-ansi-megaparsec
+    type:              exitcode-stdio-1.0
+    build-depends:     base
+                     , ansi-megaparsec
+    hs-source-dirs:    test
+    main-is:           test.hs
+    default-language:  Haskell2010
