@@ -9,6 +9,7 @@ let
   haskellOverrides =
     { overrides = self: super: {
         megaparsec = self.callPackage ./megaparsec-7_0_0_dev.nix {};
+        hspec-megaparsec = self.callPackage ./hspec-megaparsec-2_0_0_dev.nix {};
         parser-combinators = self.callPackage ./parser-combinators-1_0_0.nix {};
       };
     };
