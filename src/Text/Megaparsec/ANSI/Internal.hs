@@ -4,6 +4,7 @@
 module Text.Megaparsec.ANSI.Internal
   ( psingleton
   , pappend
+  , manyTerminatedBy
   ) where
 
 import Text.Megaparsec
@@ -20,3 +21,10 @@ psingleton = fmap (tokenToChunk (Proxy :: Proxy s))
 pappend :: (MonadParsec e s m, Semigroup a) => m a -> m a -> m a
 pappend = liftA2 (<>)
 {-# INLINE pappend #-}
+
+-- | Similar to 'manyTill', but includes the terminating chunk (and the parse results are semigroup).
+manyTerminatedBy :: (MonadParsec e s m, Semigroup a) => m a -> m a -> m a
+manyTerminatedBy p end = go
+  where
+    go = end <|> pappend p go
+{-# INLINE manyTerminatedBy #-}

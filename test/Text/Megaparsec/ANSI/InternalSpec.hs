@@ -16,3 +16,8 @@ spec = do
   describe "pappend" $ do
     it "works" $ do
       parse (chunk "abc" `pappend` chunk "de" :: Parser String) "" "abcdefgh" `shouldParse` "abcde"
+
+  describe "manyTerminatedBy" $ do
+    it "works" $ do
+      parse (manyTerminatedBy (chunk "ab") (chunk "cd") :: Parser String) "" "abababcdefg" `shouldParse` "abababcd"
+      parse (manyTerminatedBy (chunk "ab") (chunk "cd") :: Parser String) "" "cdefg" `shouldParse` "cd"
