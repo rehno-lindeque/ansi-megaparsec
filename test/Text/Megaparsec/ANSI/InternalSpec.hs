@@ -1,6 +1,5 @@
 module Text.Megaparsec.ANSI.InternalSpec (spec) where
 
-import Data.Void
 import Test.Hspec
 import Test.Hspec.Megaparsec
 

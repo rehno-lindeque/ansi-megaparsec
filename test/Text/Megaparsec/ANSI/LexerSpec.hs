@@ -1,13 +1,11 @@
 module Text.Megaparsec.ANSI.LexerSpec (spec) where
 
-import Data.Void
 import Test.Hspec
 import Test.Hspec.Megaparsec
+import Test.AdHoc
 
 import Text.Megaparsec
 import Text.Megaparsec.ANSI.Lexer
-
-type Parser = Parsec Void String
 
 spec :: Spec
 spec =
