@@ -8,7 +8,7 @@ import Text.Megaparsec
 import Text.Megaparsec.ANSI.Lexer
 
 spec :: Spec
-spec =
+spec = do
   describe "esc" $ do
     context "when given \\ESC" $
       it "works" $ do
@@ -17,3 +17,11 @@ spec =
       it "fails" $ do
         parse (esc :: Parser Char) "" `shouldFailOn` "a"
 
+  describe "anyCsi" $ do
+    context "when given ESC+CSI" $
+      it "works" $ do
+        parse (anyCsi ExcludeSingle8BitC1 :: Parser String) "" "\ESC[" `shouldParse` "\ESC["
+
+    context "when given a single 8-bit CSI" $
+      it "works" $ do
+        parse (anyCsi IncludeSingle8BitC1 :: Parser String) "" "\x9b" `shouldParse` "\x9b"
