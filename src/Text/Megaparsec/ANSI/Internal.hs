@@ -1,4 +1,4 @@
-{-# language OverloadedStrings, FlexibleContexts, ScopedTypeVariables, TypeFamilies #-}
+{-# language ScopedTypeVariables #-}
 
 -- | Internal helpers that normally do not need to be imported.
 module Text.Megaparsec.ANSI.Internal
