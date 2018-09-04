@@ -56,3 +56,24 @@ spec = do
     context "when given a 24-bit SGR color" $
       it "works" $ do
         parse (anyAnsiControlSequence ExcludeSingle8BitC1 :: Parser String) "" "\ESC[38;2;255;82;197;48;2;155;106;0m" `shouldParse` "\ESC[38;2;255;82;197;48;2;155;106;0m"
+
+  describe "plainText1" $ do
+    it "works" $ do
+      parse (plainText :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"
+
+  describe "plainText1" $ do
+    it "works" $ do
+      parse (plainText1 :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"
+    it "requires at least 1 plain text character" $ do
+      parse (plainText1 :: Parser String) "" `shouldFailOn` "\ESC[31m"
+
+  describe "printText" $ do
+    it "works" $ do
+      parse (printText :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"
+
+  describe "printText1" $ do
+    it "works" $ do
+      parse (printText1 :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"
+      parse (printText1 :: Parser String) "" "abcdef\tghijk\ESC[31m" `shouldParse` "abcdef"
+    it "requires at least 1 print character" $ do
+      parse (printText1 :: Parser String) "" `shouldFailOn` "\ESC[31m"

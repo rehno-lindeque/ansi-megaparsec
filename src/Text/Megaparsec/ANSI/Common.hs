@@ -2,11 +2,27 @@
 -- Typically there is no need to import this directly as these helpers are generally used building blocks in this package.
 module Text.Megaparsec.ANSI.Common
   (
+    -- * Trivial matches
+    isPrint
+  , isGraphic
+
     -- * ECMA 48 control sequence, ancillary bytes
-    isCsParameterByte
+  , isCsParameterByte
   , isCsIntermediateByte
   , isCsFinalByte
   ) where
+
+import qualified Data.Char as C
+
+-- | Match the set of print characters.
+isPrint :: (Enum char) => char -> Bool
+isPrint = C.isPrint . toEnum . fromEnum
+{-# INLINE isPrint #-}
+
+-- | Match the set of graphic characters (including whitespace characters in C0 and \160).
+isGraphic :: (Enum char) => char -> Bool
+isGraphic = (\c -> C.isPrint c || C.isSpace c) . toEnum . fromEnum
+{-# INLINE isGraphic #-}
 
 -- | Control sequence parameter byte; zero or more may follow a CSI.
 -- See ECMA-48, section 5.4.
