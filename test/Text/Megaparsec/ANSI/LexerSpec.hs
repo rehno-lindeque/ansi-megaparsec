@@ -77,3 +77,16 @@ spec = do
       parse (printText1 :: Parser String) "" "abcdef\tghijk\ESC[31m" `shouldParse` "abcdef"
     it "requires at least 1 print character" $ do
       parse (printText1 :: Parser String) "" `shouldFailOn` "\ESC[31m"
+      parse (printText1 :: Parser String) "" `shouldFailOn` "\x9b[31m"
+
+  describe "individualChars" $ do
+    it "works" $ do
+      parse (individualChars :: Parser String) "" "abcdef\nghijk\ESC[31m" `shouldParse` "abcdef\nghijk"
+      parse (individualChars1 :: Parser String) "" "\x9b[31m" `shouldParse` "\x9b[31m"
+
+  describe "individualChars1" $ do
+    it "works" $ do
+      parse (individualChars1 :: Parser String) "" "abcdef\nghijk\ESC[31m" `shouldParse` "abcdef\nghijk"
+      parse (individualChars1 :: Parser String) "" "\x9b[31m" `shouldParse` "\x9b[31m"
+    it "requires at least 1 print character" $ do
+      parse (individualChars1 :: Parser String) "" `shouldFailOn` "\ESC[31m"

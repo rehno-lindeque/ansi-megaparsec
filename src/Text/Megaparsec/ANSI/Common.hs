@@ -4,6 +4,7 @@ module Text.Megaparsec.ANSI.Common
   (
     -- * Trivial matches
     isPrint
+  , isEsc
   , isGraphic
 
     -- * ECMA 48 control sequence, ancillary bytes
@@ -13,6 +14,11 @@ module Text.Megaparsec.ANSI.Common
   ) where
 
 import qualified Data.Char as C
+
+-- | Match the \ESC character.
+isEsc :: (Eq char, Enum char) => char -> Bool
+isEsc c = c == toEnum 0x1b
+{-# INLINE isEsc #-}
 
 -- | Match the set of print characters.
 isPrint :: (Enum char) => char -> Bool

@@ -13,6 +13,8 @@ module Text.Megaparsec.ANSI.Lexer
   , plainText1
   , printText
   , printText1
+  , individualChars
+  , individualChars1
 
     -- * C1 escape sequence variations
 
@@ -82,6 +84,19 @@ printText = takeWhileP Nothing isPrint
 printText1 :: (MonadParsec e s m, Stream s, Ord e, Enum (Token s)) => m (Tokens s)
 printText1 = takeWhile1P Nothing isPrint
 {-# INLINE printText1 #-}
+
+-- | Parse consecutive individual characters (including C0 and single 8-bit C1 control characters), but not including escape sequences.
+-- This can be used in situations where escape sequences are the only control functions of interest.
+individualChars :: (MonadParsec e s m, Stream s, Ord e, Enum (Token s), Eq (Token s)) => m (Tokens s)
+individualChars = takeWhileP Nothing (not . isEsc)
+{-# INLINE individualChars #-}
+
+-- | Parse consecutive individual characters (including C0 and single 8-bit C1 control characters), but not including escape sequences.
+-- This can be used in situations where escape sequences are the only control functions of interest.
+-- Fails if it doesn't match at least 1 character.
+individualChars1 :: (MonadParsec e s m, Stream s, Ord e, Enum (Token s), Eq (Token s)) => m (Tokens s)
+individualChars1 = takeWhile1P Nothing (not . isEsc)
+{-# INLINE individualChars1 #-}
 
 -- $escvar
 -- Control sequences that have a two character ESC-prefixed variation (as well as an 8-bit variation)
