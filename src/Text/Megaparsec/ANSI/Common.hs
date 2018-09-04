@@ -3,8 +3,13 @@
 module Text.Megaparsec.ANSI.Common
   (
     -- * Trivial matches
-    isPrint
+    isC0
+  , isSp
+  , isDel
   , isEsc
+  , isPrint
+  , isSpace
+  , isControl
   , isGraphic
 
     -- * ECMA 48 control sequence, ancillary bytes
@@ -15,6 +20,21 @@ module Text.Megaparsec.ANSI.Common
 
 import qualified Data.Char as C
 
+-- | Match the C0 character set. Does not include \SP or \DEL.
+isC0 :: (Ord char, Enum char) => char -> Bool
+isC0 c = c >= toEnum 0 && c <= toEnum 31
+{-# INLINE isC0 #-}
+
+-- | Match the \SP (simply @' '@) character.
+isSp :: (Eq char, Enum char) => char -> Bool
+isSp c = c == toEnum 32
+{-# INLINE isSp #-}
+
+-- | Match the \DEL character.
+isDel :: (Eq char, Enum char) => char -> Bool
+isDel c = c == toEnum 127
+{-# INLINE isDel #-}
+
 -- | Match the \ESC character.
 isEsc :: (Eq char, Enum char) => char -> Bool
 isEsc c = c == toEnum 0x1b
@@ -24,6 +44,16 @@ isEsc c = c == toEnum 0x1b
 isPrint :: (Enum char) => char -> Bool
 isPrint = C.isPrint . toEnum . fromEnum
 {-# INLINE isPrint #-}
+
+-- | Match the set of whitespace characters.
+isSpace :: (Enum char) => char -> Bool
+isSpace = C.isSpace . toEnum . fromEnum
+{-# INLINE isSpace #-}
+
+-- | Match the set of control characters.
+isControl :: (Enum char) => char -> Bool
+isControl = C.isControl . toEnum . fromEnum
+{-# INLINE isControl #-}
 
 -- | Match the set of graphic characters (including whitespace characters in C0 and \160).
 isGraphic :: (Enum char) => char -> Bool
