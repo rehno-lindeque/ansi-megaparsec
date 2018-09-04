@@ -39,6 +39,9 @@ spec = do
         parse (anyCsi IncludeSingle8BitC1 :: Parser String) "" "\x9b" `shouldParse` "\x9b"
 
   describe "anyAnsiControlSequence" $ do
+    context "when given a single 8-bit C1 CSI character as a prefix" $
+      it "works" $ do
+        parse (anyAnsiControlSequence IncludeSingle8BitC1 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
     context "when given cursor positions" $
       it "works" $ do
         parse (anyAnsiControlSequence ExcludeSingle8BitC1 :: Parser String) "" "\ESC[20;20H" `shouldParse` "\ESC[20;20H"
@@ -56,6 +59,11 @@ spec = do
     context "when given a 24-bit SGR color" $
       it "works" $ do
         parse (anyAnsiControlSequence ExcludeSingle8BitC1 :: Parser String) "" "\ESC[38;2;255;82;197;48;2;155;106;0m" `shouldParse` "\ESC[38;2;255;82;197;48;2;155;106;0m"
+
+  describe "anyControlSequence" $ do
+    it "works" $ do
+      parse (anyControlSequence ExcludeSingle8BitC1 :: Parser String) "" "\ESC[31m" `shouldParse` "\ESC[31m"
+      parse (anyControlSequence IncludeSingle8BitC1 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
 
   describe "plainText1" $ do
     it "works" $ do

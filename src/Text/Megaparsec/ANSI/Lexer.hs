@@ -33,6 +33,7 @@ module Text.Megaparsec.ANSI.Lexer
     -- $c1compat
   , anyCsi
   , anyAnsiControlSequence
+  , anyControlSequence
 
     -- * Trivial parsers
 
@@ -155,6 +156,13 @@ anyAnsiControlSequence s8c1Compat = anyCsi s8c1Compat `pappend` parameterBytes `
     intermediateBytes = takeWhileP (Just "CSI intermediate byte") isCsIntermediateByte
     finalByte = psingleton (satisfy isCsFinalByte)
 {-# INLINE anyAnsiControlSequence #-}
+
+-- | Match any control sequence.
+-- Uses lookahead to quickly fail on any @ESC@ (or @CSI@) character prefix.
+anyControlSequence :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyControlSequence s8c1Compat =
+  anyAnsiControlSequence s8c1Compat <|> escC1
+{-# INLINE anyControlSequence #-}
 
 -- $trivial
 
