@@ -37,6 +37,7 @@ module Text.Megaparsec.ANSI.Lexer
   , anyAnsiControlSequence
   , anyControlSequence
   , anyControlFunction
+  , anyCharacterString
 
     -- * Trivial parsers
 
@@ -48,6 +49,7 @@ module Text.Megaparsec.ANSI.Lexer
 import Text.Megaparsec
 import Text.Megaparsec.ANSI.Internal
 import Text.Megaparsec.ANSI.Common
+import Text.Megaparsec.ANSI.C1
 import Data.Semigroup (Semigroup, (<>))
 import Data.Proxy
 
@@ -175,6 +177,25 @@ anyControlFunction s8c1Compat =
   where
     controlChar = satisfy isControl <?> "control character"
 {-# INLINE anyControlFunction #-}
+
+-- | Any character string (a type of control string).
+-- Typically recognized but ignored by terminal emulators.
+--
+-- E.g.
+--
+-- >>> putStrLn "abc\ESCXtest\ESC\\def"
+-- abcdef
+--
+anyCharacterString :: (MonadParsec e s m, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyCharacterString s8c1Compat =
+  sos `pappend` manyTerminatedBy (psingleton anySingle) st
+  where
+    (sos, st) = case s8c1Compat of
+      ExcludeSingle8BitC1 ->
+        (escSos, escSt)
+      IncludeSingle8BitC1 ->
+        (escSos <|> psingleton single8BitSos, escSt <|> psingleton single8BitSt)
+{-# INLINE anyCharacterString #-}
 
 -- $trivial
 

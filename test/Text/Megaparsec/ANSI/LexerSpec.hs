@@ -75,6 +75,11 @@ spec = do
         parse (anyControlFunction ExcludeSingle8BitC1 :: Parser String) "" "\ETX" `shouldParse` "\ETX"
         parse (anyControlFunction IncludeSingle8BitC1 :: Parser String) "" "\x80" `shouldParse` "\x80"
 
+  describe "anyCharacterString" $ do
+    it "works" $ do
+      parse (anyCharacterString ExcludeSingle8BitC1 :: Parser String) "" "\ESCXtest\ESC\\abc" `shouldParse` "\ESCXtest\ESC\\"
+      parse (anyCharacterString IncludeSingle8BitC1 :: Parser String) "" "\x98test\x9c\&abc" `shouldParse` "\x98test\x9c"
+
   describe "plainText1" $ do
     it "works" $ do
       parse (plainText :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"

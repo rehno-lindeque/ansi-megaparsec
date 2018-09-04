@@ -19,9 +19,10 @@ library
                      , text
   hs-source-dirs:      src
   exposed-modules:    Text.Megaparsec.ANSI
-                    , Text.Megaparsec.ANSI.Lexer
-                    , Text.Megaparsec.ANSI.Internal
+                    , Text.Megaparsec.ANSI.C1
                     , Text.Megaparsec.ANSI.Common
+                    , Text.Megaparsec.ANSI.Internal
+                    , Text.Megaparsec.ANSI.Lexer
   default-language:    Haskell2010
 
 test-suite test-ansi-megaparsec
