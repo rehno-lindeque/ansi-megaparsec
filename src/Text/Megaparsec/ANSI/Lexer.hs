@@ -8,6 +8,8 @@ module Text.Megaparsec.ANSI.Lexer
     -- $compat
     Single8BitC1Compatibility (..)
 
+    -- * Regular text
+
     -- $regtext
   , plainText
   , plainText1
@@ -34,6 +36,7 @@ module Text.Megaparsec.ANSI.Lexer
   , anyCsi
   , anyAnsiControlSequence
   , anyControlSequence
+  , anyControlFunction
 
     -- * Trivial parsers
 
@@ -163,6 +166,15 @@ anyControlSequence :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) 
 anyControlSequence s8c1Compat =
   anyAnsiControlSequence s8c1Compat <|> escC1
 {-# INLINE anyControlSequence #-}
+
+-- | Any terminal control character or sequence of characters.
+-- Differs from 'Text.Megaparsec.controlChar' in that multi-byte sequences are fully consumed as lexemes.
+anyControlFunction :: (MonadParsec e s m, Stream s, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyControlFunction s8c1Compat =
+  (anyControlSequence s8c1Compat <|> psingleton controlChar)
+  where
+    controlChar = satisfy isControl <?> "control character"
+{-# INLINE anyControlFunction #-}
 
 -- $trivial
 
