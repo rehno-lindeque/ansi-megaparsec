@@ -21,6 +21,7 @@ library
   exposed-modules:    Text.Megaparsec.ANSI
                     , Text.Megaparsec.ANSI.Lexer
                     , Text.Megaparsec.ANSI.Internal
+                    , Text.Megaparsec.ANSI.Common
   default-language:    Haskell2010
 
 test-suite test-ansi-megaparsec
