@@ -60,7 +60,7 @@ module Text.Megaparsec.ANSI.Lexer
 import Text.Megaparsec
 import Text.Megaparsec.ANSI.Internal
 import Text.Megaparsec.ANSI.Common
-import Text.Megaparsec.ANSI.C1
+import Text.Megaparsec.ANSI.C1.Lexer
 import Data.Semigroup (Semigroup, (<>))
 import Data.Proxy
 

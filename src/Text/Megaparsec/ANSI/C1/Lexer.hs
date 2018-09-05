@@ -1,5 +1,5 @@
 {-# language FlexibleContexts, ScopedTypeVariables #-}
-module Text.Megaparsec.ANSI.C1
+module Text.Megaparsec.ANSI.C1.Lexer
   (
     -- * C1 escape sequence variations
 
