@@ -12,6 +12,10 @@ module Text.Megaparsec.ANSI.Common
   , isControl
   , isGraphic
 
+    -- * ASCII specific
+  , isAsciiPrint
+  , isAsciiFormatEffector
+
     -- * ECMA 48 control sequence, ancillary bytes
   , isCsParameterByte
   , isCsIntermediateByte
@@ -59,6 +63,19 @@ isControl = C.isControl . toEnum . fromEnum
 isGraphic :: (Enum char) => char -> Bool
 isGraphic = (\c -> C.isPrint c || C.isSpace c) . toEnum . fromEnum
 {-# INLINE isGraphic #-}
+
+-- | Match the set of printable ASCII characters.
+isAsciiPrint :: (Enum char, Ord char) => char -> Bool
+isAsciiPrint c = c >= toEnum 0x20 && c <= toEnum 0x7e
+{-# INLINE isAsciiPrint #-}
+
+-- | Match format effector characters FE0 to FE5 (@\b@,@\t@,@\n@,@\v@,@\f@,@\r@)
+-- Note that this does not include format effectors in the C1 set:
+-- In other words, the following are deliberately excluded:
+-- @IND@, @NEL@, @HTS@, @HTJ@, @VTS@, @PLD@, @PLU@, @RI@
+isAsciiFormatEffector :: (Enum char, Ord char) => char -> Bool
+isAsciiFormatEffector c = c >= toEnum 0x8 && c <= toEnum 0xd
+{-# INLINE isAsciiFormatEffector #-}
 
 -- | Control sequence parameter byte; zero or more may follow a CSI.
 -- See ECMA-48, section 5.4.

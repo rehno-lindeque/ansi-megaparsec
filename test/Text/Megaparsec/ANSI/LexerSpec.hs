@@ -80,6 +80,17 @@ spec = do
       parse (anyCharacterString ExcludeSingle8BitC1 :: Parser String) "" "\ESCXtest\ESC\\abc" `shouldParse` "\ESCXtest\ESC\\"
       parse (anyCharacterString IncludeSingle8BitC1 :: Parser String) "" "\x98test\x9c\&abc" `shouldParse` "\x98test\x9c"
 
+  describe "anyCommandString" $ do
+    it "works" $ do
+      parse (anyCommandString ExcludeSingle8BitC1 :: Parser String) "" "\ESCPtest\ESC\\abc" `shouldParse` "\ESCPtest\ESC\\"
+      parse (anyCommandString ExcludeSingle8BitC1 :: Parser String) "" "\ESC]test\ESC\\abc" `shouldParse` "\ESC]test\ESC\\"
+      parse (anyCommandString ExcludeSingle8BitC1 :: Parser String) "" "\ESC^test\ESC\\abc" `shouldParse` "\ESC^test\ESC\\"
+      parse (anyCommandString ExcludeSingle8BitC1 :: Parser String) "" "\ESC_test\ESC\\abc" `shouldParse` "\ESC_test\ESC\\"
+      parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x90test\x9c\&abc" `shouldParse` "\x90test\x9c"
+      parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x9dtest\x9c\&abc" `shouldParse` "\x9dtest\x9c"
+      parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x9etest\x9c\&abc" `shouldParse` "\x9etest\x9c"
+      parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x9ftest\x9c\&abc" `shouldParse` "\x9ftest\x9c"
+
   describe "plainText1" $ do
     it "works" $ do
       parse (plainText :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"

@@ -38,6 +38,7 @@ module Text.Megaparsec.ANSI.Lexer
   , anyControlSequence
   , anyControlFunction
   , anyCharacterString
+  , anyCommandString
 
     -- * Trivial parsers
 
@@ -179,7 +180,7 @@ anyControlFunction s8c1Compat =
 {-# INLINE anyControlFunction #-}
 
 -- | Any character string (a type of control string).
--- Typically recognized but ignored by terminal emulators.
+-- Appears to be recognized, but ignored, by a tested terminal emulator.
 --
 -- E.g.
 --
@@ -196,6 +197,42 @@ anyCharacterString s8c1Compat =
       IncludeSingle8BitC1 ->
         (escSos <|> psingleton single8BitSos, escSt <|> psingleton single8BitSt)
 {-# INLINE anyCharacterString #-}
+
+-- | Any command string delimeter @DCS@, @OSC@, @PM@, @APC@.
+anyCommandStringDelimeter :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyCommandStringDelimeter ExcludeSingle8BitC1 =
+  psingleton esc `pappend` psingleton (satisfy (\c -> (c >= toEnum 0x5d && c <= toEnum 0x5f) || c == toEnum 0x50))
+anyCommandStringDelimeter IncludeSingle8BitC1 =
+  anyCommandStringDelimeter ExcludeSingle8BitC1 <|> psingleton (satisfy (\c -> (c >= toEnum 0x9d && c <= toEnum 0x9f) || c == toEnum 0x90))
+{-# INLINE anyCommandStringDelimeter #-}
+
+-- | Any command string (a type of control string).
+-- * @DCS@ appears to be recognized, but ignored, by a tested terminal emulator.
+-- * @PM@ appears to be unrecognized by a tested terminal emulator.
+-- * @OSC@ appears to be unrecognized by a tested terminal emulator.
+-- * @APC@ appears to be unrecognized by a tested terminal emulator.
+--
+-- E.g.
+--
+-- >>> putStrLn "abc\ESCPtest\ESC\\def"
+-- abcdef
+-- >>> putStrLn "abc\ESC^test\ESC\\def"
+-- abc␛^test␛\def
+-- >>> putStrLn "abc\ESC]test\ESC\\def"
+-- abc␛]test␛\def
+-- >>> putStrLn "abc\ESC_test\ESC\\def"
+-- abc␛_test␛\def
+--
+anyCommandString :: (MonadParsec e s m, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyCommandString s8c1Compat =
+  anyCommandStringDelimeter s8c1Compat `pappend` takeWhileP (Just "command string byte") isCommandStringByte `pappend` st
+  where
+    -- We assume that neither UTF-8, nor C1 format effectors are ot accepted since ECMA-48 specifies the ranges explicitly.
+    isCommandStringByte c = isAsciiPrint c || isAsciiFormatEffector c
+    st = case s8c1Compat of
+      ExcludeSingle8BitC1 -> escSt
+      IncludeSingle8BitC1 -> escSt <|> psingleton single8BitSt
+{-# INLINE anyCommandString #-}
 
 -- $trivial
 
