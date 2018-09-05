@@ -39,6 +39,9 @@ module Text.Megaparsec.ANSI.Lexer
   , anyControlFunction
   , anyCharacterString
   , anyCommandString
+  , anyCommandStringDelimeter
+  , anyControlString
+  , anyControlStringDelimeter
 
     -- * Trivial parsers
 
@@ -178,6 +181,21 @@ anyControlFunction s8c1Compat =
   where
     controlChar = satisfy isControl <?> "control character"
 {-# INLINE anyControlFunction #-}
+
+-- | Any control string.
+-- See ECMA-48, section 5.6.
+anyControlString :: (MonadParsec e s m, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyControlString s8c1Compat =
+  anyCharacterString s8c1Compat <|> anyCommandString s8c1Compat
+{-# INLINE anyControlString #-}
+
+-- | Any control string delimeter (DCS, SOS, OSC, PM, APC).
+anyControlStringDelimeter :: (MonadParsec e s m, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
+anyControlStringDelimeter ExcludeSingle8BitC1 =
+  psingleton esc `pappend` psingleton (satisfy (\c -> (c >= toEnum 0x5d && c <= toEnum 0x5f) || c == toEnum 0x50 || c == toEnum 0x58))
+anyControlStringDelimeter IncludeSingle8BitC1 =
+  anyControlStringDelimeter ExcludeSingle8BitC1 <|> psingleton (satisfy (\c -> (c >= toEnum 0x9d && c <= toEnum 0x9f) || c == toEnum 0x90 || c == toEnum 0x98))
+{-# INLINE anyControlStringDelimeter #-}
 
 -- | Any character string (a type of control string).
 -- Appears to be recognized, but ignored, by a tested terminal emulator.

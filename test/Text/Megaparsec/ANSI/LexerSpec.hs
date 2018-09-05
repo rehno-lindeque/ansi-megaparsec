@@ -91,6 +91,11 @@ spec = do
       parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x9etest\x9c\&abc" `shouldParse` "\x9etest\x9c"
       parse (anyCommandString IncludeSingle8BitC1 :: Parser String) "" "\x9ftest\x9c\&abc" `shouldParse` "\x9ftest\x9c"
 
+  describe "anyControlString" $ do
+    it "works" $ do
+      parse (anyControlString ExcludeSingle8BitC1 :: Parser String) "" "\ESCXtest\ESC\\abc" `shouldParse` "\ESCXtest\ESC\\"
+      parse (anyControlString ExcludeSingle8BitC1 :: Parser String) "" "\ESCPtest\ESC\\abc" `shouldParse` "\ESCPtest\ESC\\"
+
   describe "plainText1" $ do
     it "works" $ do
       parse (plainText :: Parser String) "" "abcdef ghijk\ESC[31m" `shouldParse` "abcdef ghijk"
