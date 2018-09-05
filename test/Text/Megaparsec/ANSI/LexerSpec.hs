@@ -75,18 +75,18 @@ spec = do
 
   describe "anyControlSequence" $ do
     it "works" $ do
-      parse (anyControlSequence ExcludeSingle8BitC1 :: Parser String) "" "\ESC[31m" `shouldParse` "\ESC[31m"
-      parse (anyControlSequence IncludeSingle8BitC1 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
+      parse (anyControlSequence ExcludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\ESC[31m" `shouldParse` "\ESC[31m"
+      parse (anyControlSequence IncludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
 
   describe "anyControlFunction" $ do
     context "given a control sequence" $ do
       it "works" $ do
-        parse (anyControlFunction ExcludeSingle8BitC1 :: Parser String) "" "\ESC[31m" `shouldParse` "\ESC[31m"
-        parse (anyControlFunction IncludeSingle8BitC1 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
+        parse (anyControlFunction ExcludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\ESC[31m" `shouldParse` "\ESC[31m"
+        parse (anyControlFunction IncludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\x9b\&31m" `shouldParse` "\x9b\&31m"
     context "given a single control character" $ do
       it "works" $ do
-        parse (anyControlFunction ExcludeSingle8BitC1 :: Parser String) "" "\ETX" `shouldParse` "\ETX"
-        parse (anyControlFunction IncludeSingle8BitC1 :: Parser String) "" "\x80" `shouldParse` "\x80"
+        parse (anyControlFunction ExcludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\ETX" `shouldParse` "\ETX"
+        parse (anyControlFunction IncludeSingle8BitC1 ExcludeIso2022 :: Parser String) "" "\x80" `shouldParse` "\x80"
 
   describe "anyCharacterString" $ do
     it "works" $ do

@@ -37,9 +37,9 @@ module Text.Megaparsec.ANSI.Lexer
   , iso2022CharsetDesignation
   , iso2022AdditionalControlSequence
 
-    -- * C1 single 8-bit character / escape sequence compatible parsers
+    -- * ISO/IEC 2022 / C1 single 8-bit character / escape sequence compatible parsers
 
-    -- $c1compat
+    -- $c1iso2022compat
   , anyCsi
   , anyAnsiControlSequence
   , anyControlSequence
@@ -234,16 +234,25 @@ anyAnsiControlSequence s8c1Compat = anyCsi s8c1Compat `pappend` parameterBytes `
 
 -- | Match any control sequence.
 -- Uses lookahead to quickly fail on any @ESC@ (or @CSI@) character prefix.
-anyControlSequence :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => Single8BitC1Compatibility -> m (Tokens s)
-anyControlSequence s8c1Compat =
-  anyAnsiControlSequence s8c1Compat <|> escC1
+anyControlSequence :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => Single8BitC1Compatibility -> Iso2022Compatibility -> m (Tokens s)
+anyControlSequence s8c1Compat iso2022Compat =
+  let
+    matchPrefix = case s8c1Compat of
+      IncludeSingle8BitC1 -> esc <|> single8BitCsi
+      ExcludeSingle8BitC1 -> esc
+    matchEcma48 = anyAnsiControlSequence s8c1Compat <|> escC1
+    matchIso2022 = case iso2022Compat of
+      IncludeIso2022 -> iso2022CharsetDesignation <|> iso2022AdditionalControlSequence
+      ExcludeIso2022 -> empty
+  in
+    lookAhead matchPrefix *> (matchEcma48 <|> matchIso2022)
 {-# INLINE anyControlSequence #-}
 
 -- | Any terminal control character or sequence of characters.
 -- Differs from 'Text.Megaparsec.controlChar' in that multi-byte sequences are fully consumed as lexemes.
-anyControlFunction :: (MonadParsec e s m, Stream s, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> m (Tokens s)
-anyControlFunction s8c1Compat =
-  (anyControlSequence s8c1Compat <|> psingleton controlChar)
+anyControlFunction :: (MonadParsec e s m, Stream s, Semigroup (Tokens s), Enum (Token s)) => Single8BitC1Compatibility -> Iso2022Compatibility -> m (Tokens s)
+anyControlFunction s8c1Compat iso2022Compat =
+  (anyControlSequence s8c1Compat iso2022Compat <|> psingleton controlChar)
   where
     controlChar = satisfy isControl <?> "control character"
 {-# INLINE anyControlFunction #-}
