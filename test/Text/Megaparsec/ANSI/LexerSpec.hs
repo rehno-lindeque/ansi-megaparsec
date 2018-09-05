@@ -37,6 +37,11 @@ spec = do
       it "works" $ do
         parse (iso2022CharsetDesignation :: Parser String) "" "\ESC$+I" `shouldParse` "\ESC$+I"
 
+  describe "iso2022AdditionalControlSequence" $ do
+    it "works" $ do
+      parse (iso2022AdditionalControlSequence :: Parser String) "" "\ESC`" `shouldParse` "\ESC`"
+      parse (iso2022AdditionalControlSequence :: Parser String) "" "\ESC~" `shouldParse` "\ESC~"
+
   describe "anyCsi" $ do
     context "when given ESC+CSI" $
       it "works" $ do

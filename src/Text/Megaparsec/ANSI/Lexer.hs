@@ -34,6 +34,7 @@ module Text.Megaparsec.ANSI.Lexer
     -- * ISO/IEC 2022
     -- $iso2022
   , iso2022CharsetDesignation
+  , iso2022AdditionalControlSequence
 
     -- * C1 single 8-bit character / escape sequence compatible parsers
 
@@ -178,6 +179,13 @@ iso2022CharsetDesignation =
   where
     intermediateBytes = takeWhile1P (Just "ISO/IEC 2022 intermediate byte") isIso2022IntermediateByte
     finalByte = psingleton (satisfy (\c -> isIso2022StandardFinalByte c || isIso2022PrivateFinalByte c))
+
+-- | Additional control functions (escape sequences) unique to ISO/IEC 2022.
+-- These are not present in the C0, C1 sets, or any other ANSI escape sequences reserved by ECMA-48.
+iso2022AdditionalControlSequence :: forall e s m. (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => m (Tokens s)
+iso2022AdditionalControlSequence =
+  psingleton esc `pappend` psingleton (satisfy (\c -> c >= toEnum 0x60 && c <= toEnum 0x7E))
+{-# INLINE iso2022AdditionalControlSequence #-}
 
 -- $c1compat
 -- Use these parsers when support for single-byte C1 characters is a requirement.
