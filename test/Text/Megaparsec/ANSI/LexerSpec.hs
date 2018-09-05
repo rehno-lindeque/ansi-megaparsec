@@ -122,5 +122,5 @@ spec = do
     it "works" $ do
       parse (individualChars1 :: Parser String) "" "abcdef\nghijk\ESC[31m" `shouldParse` "abcdef\nghijk"
       parse (individualChars1 :: Parser String) "" "\x9b[31m" `shouldParse` "\x9b[31m"
-    it "requires at least 1 print character" $ do
+    it "requires at least 1 non-sequence character" $ do
       parse (individualChars1 :: Parser String) "" `shouldFailOn` "\ESC[31m"
