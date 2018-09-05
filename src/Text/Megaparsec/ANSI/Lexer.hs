@@ -7,6 +7,7 @@ module Text.Megaparsec.ANSI.Lexer
 
     -- $compat
     Single8BitC1Compatibility (..)
+  , Iso2022Compatibility (..)
 
     -- * Regular text
 
@@ -29,6 +30,10 @@ module Text.Megaparsec.ANSI.Lexer
     -- $singlevar
   , single8BitC1
   , single8BitCsi
+
+    -- * ISO/IEC 2022
+    -- $iso2022
+  , iso2022CharsetDesignation
 
     -- * C1 single 8-bit character / escape sequence compatible parsers
 
@@ -69,6 +74,23 @@ import Data.Proxy
 data Single8BitC1Compatibility
   = ExcludeSingle8BitC1 -- ^ Recommended: Do not parse 8-bit C1 control codes (similar to @S7C1T@ in VT100-compatible terminals)
   | IncludeSingle8BitC1 -- ^ Parse 8-bit C1 control codes as well as ESC-prefixed alternatives (similar to @S8C1T@ in VT100-compatible terminals)
+
+-- | A flag indicating whether ISO control characters need to be parsed.
+--
+-- Note that UTF-8 fits the "other coding system" definition described section 15.4 of ECMA 35. In other words, it exists outside
+-- of the ISO 2022 mechanism for shifting character sets.
+-- UTF-8 should be prefered when possible since it avoids the various problems inherent to a stateful coding system like ISO 2022.
+-- The program @luit@ can be used (and may even be invoked automatically by your terminal emulator) to convert to UTF-8.
+-- Use the program @locale@ in order to inspect your environment.
+--
+-- See also:
+-- * https://www.cl.cam.ac.uk/~mgk25/unicode.html#term
+-- * https://askubuntu.com/a/133221/17596
+-- * https://www.irif.fr/~jch/software/luit
+-- * https://invisible-island.net/luit/luit-figures.html
+data Iso2022Compatibility
+  = ExcludeIso2022 -- ^ Recommended: Do not parse ISO/IEC 2022.
+  | IncludeIso2022 -- ^ Parse ISO/IEC 2022
 
 -- $regtext
 -- Use these parsers to match sequences characters that have no special meaning in terminals.
@@ -147,6 +169,15 @@ single8BitC1 = satisfy (\c -> c >= toEnum 0x80 && c <= toEnum 0x9F) <?> "C1"
 single8BitCsi :: (MonadParsec e s m, Enum (Token s)) => m (Token s)
 single8BitCsi = single (toEnum 0x9b)
 {-# INLINE single8BitCsi #-}
+
+-- | Matches ISO/IEC 2022 control sequences that designate a character set to use.
+-- See ECMA 35, section 13.2.2.
+iso2022CharsetDesignation :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => m (Tokens s)
+iso2022CharsetDesignation =
+  psingleton esc `pappend` intermediateBytes `pappend` finalByte
+  where
+    intermediateBytes = takeWhile1P (Just "ISO/IEC 2022 intermediate byte") isIso2022IntermediateByte
+    finalByte = psingleton (satisfy (\c -> isIso2022StandardFinalByte c || isIso2022PrivateFinalByte c))
 
 -- $c1compat
 -- Use these parsers when support for single-byte C1 characters is a requirement.

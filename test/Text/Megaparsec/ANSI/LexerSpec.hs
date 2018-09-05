@@ -29,6 +29,14 @@ spec = do
         parse (single8BitC1 :: Parser Char) "" "\x80" `shouldParse` '\x80'
         parse (single8BitC1 :: Parser Char) "" "\x9f" `shouldParse` '\x9f'
 
+  describe "iso2022CharsetDesignation" $ do
+    context "when given the G0-designate 94-set, JIS X 0201-1976" $
+      it "works" $ do
+        parse (iso2022CharsetDesignation :: Parser String) "" "\ESC(J" `shouldParse` "\ESC(J"
+    context "when given the G3-designate multibyte 94-set, CNS 11643-1992 Plane 3" $
+      it "works" $ do
+        parse (iso2022CharsetDesignation :: Parser String) "" "\ESC$+I" `shouldParse` "\ESC$+I"
+
   describe "anyCsi" $ do
     context "when given ESC+CSI" $
       it "works" $ do

@@ -20,6 +20,11 @@ module Text.Megaparsec.ANSI.Common
   , isCsParameterByte
   , isCsIntermediateByte
   , isCsFinalByte
+
+    -- * ISO/IEC 2022 character set designation, ancillary bytes
+  , isIso2022IntermediateByte
+  , isIso2022StandardFinalByte
+  , isIso2022PrivateFinalByte
   ) where
 
 import qualified Data.Char as C
@@ -94,3 +99,21 @@ isCsIntermediateByte c = c >= toEnum 0x20 && c <= toEnum 0x2f
 isCsFinalByte :: (Enum char, Ord char) => char -> Bool
 isCsFinalByte c = c >= toEnum 0x40 && c <= toEnum 0x7e
 {-# INLINE isCsFinalByte #-}
+
+-- | ISO/IEC-2022 intermediate byte; one or more may follow \ESC to designate a character set.
+-- See ECMA-35, section 13.2 and table 5 in particular.
+isIso2022IntermediateByte :: (Enum char, Ord char) => char -> Bool
+isIso2022IntermediateByte c = c >= toEnum 0x20 && c <= toEnum 0x2f
+{-# INLINE isIso2022IntermediateByte #-}
+
+-- | ISO/IEC-2022 standard final byte, subject to registration; a single byte that terminates an ISO/IEC 2022 character designating escape sequence.
+-- See ECMA-35, section 13.3
+isIso2022StandardFinalByte :: (Enum char, Ord char) => char -> Bool
+isIso2022StandardFinalByte c = c >= toEnum 0x40 && c <= toEnum 0x7f
+{-# INLINE isIso2022StandardFinalByte #-}
+
+-- | ISO/IEC-2022 final byte reserved for private use; a single byte that terminates an ISO/IEC 2022 character designating escape sequence.
+-- See ECMA-35, section 13.3
+isIso2022PrivateFinalByte :: (Enum char, Ord char) => char -> Bool
+isIso2022PrivateFinalByte c = c >= toEnum 0x30 && c <= toEnum 0x3F
+{-# INLINE isIso2022PrivateFinalByte #-}
