@@ -33,6 +33,7 @@ module Text.Megaparsec.ANSI.Lexer
 
     -- * ISO/IEC 2022
     -- $iso2022
+  , anyIso2022
   , iso2022CharsetDesignation
   , iso2022AdditionalControlSequence
 
@@ -171,7 +172,32 @@ single8BitCsi :: (MonadParsec e s m, Enum (Token s)) => m (Token s)
 single8BitCsi = single (toEnum 0x9b)
 {-# INLINE single8BitCsi #-}
 
+-- | Match any ISO/IEC 2022 control function.
+-- Note that this includes some control functions in C0 and C1.
+-- 'iso2022AdditionalControlSequence' and 'iso2022CharsetDesignation' match codes that are unique to ISO/IEC 2022.
+anyIso2022 :: forall e s m. (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => m (Tokens s)
+anyIso2022 =
+  (psingleton (oneOf (map toEnum [
+    -- Included in C0
+    toEnum 0x0e, toEnum 0x0f,
+    -- Included in C1 8-bit codes
+    toEnum 0x8e, toEnum 0x8f
+  ]))
+  <|>
+    -- Included in C1 escape sequneces
+    chunk (toChunk 0x1b <> toChunk 0x4e) <|> chunk (toChunk 0x1b <> toChunk 0x4f)
+  <|>
+    -- GL/GR designations not present in C1 (anything larger than \ESC\x5F)
+    iso2022AdditionalControlSequence
+  <|>
+    -- Character set designations for the working character sets (C0,C1,G0,G1,G2,G3,etc)
+    iso2022CharsetDesignation
+  ) <?> "ISO2022"
+  where
+    toChunk c = tokenToChunk (Proxy :: Proxy s) (toEnum c)
+
 -- | Matches ISO/IEC 2022 control sequences that designate a character set to use.
+-- See 'anyIso2022' to see how this fits in with the other codes found in ISO/IEC 2022.
 -- See ECMA 35, section 13.2.2.
 iso2022CharsetDesignation :: (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => m (Tokens s)
 iso2022CharsetDesignation =
@@ -182,6 +208,7 @@ iso2022CharsetDesignation =
 
 -- | Additional control functions (escape sequences) unique to ISO/IEC 2022.
 -- These are not present in the C0, C1 sets, or any other ANSI escape sequences reserved by ECMA-48.
+-- See 'anyIso2022' to see how this fits in with the other codes found in ISO/IEC 2022.
 iso2022AdditionalControlSequence :: forall e s m. (MonadParsec e s m, Enum (Token s), Semigroup (Tokens s)) => m (Tokens s)
 iso2022AdditionalControlSequence =
   psingleton esc `pappend` psingleton (satisfy (\c -> c >= toEnum 0x60 && c <= toEnum 0x7E))
